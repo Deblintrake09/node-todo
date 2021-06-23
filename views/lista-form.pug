@@ -1,0 +1,79 @@
+extends layouts/main-layout
+
+block content 
+    .container 
+        .tareaContainer
+            if modificar
+                h3 Modificar Lista 
+            else 
+                h3 Ingrese una nueva Lista 
+            - let url = modificar ? lista.id + "?_method=PUT" : "agregar"
+            form(method="post", action="/listas/"+url)
+                label(for="titulo") Título
+                    input#titulo(type='text', name='titulo', value=modificar ? lista.titulo : "",  required)
+                label(for="estado") Estado:
+                    select#estado(name='estado')
+                        option(value="Pendiente", selected= modificar &&lista.estado==="Pendiente"?true:false) Pendiente 
+                        option(value="En Proceso", selected= modificar &&lista.estado==="En Proceso"?true:false) En Proceso
+                        if modificar
+                            option(value="Terminado", selected= modificar &&lista.estado==="Terminado"?true:false) Terminado
+                if modificar
+                    label(for="fecha_resolucion") Fecha Resolución
+                        input#fecha_resolucion(type='date', name='fecha_resolucion', value=(modificar ? lista.fecha_resolucion : null))
+                br
+                button(type='submit' onclick="return validarForm()") Guardar
+                br
+                if modificar
+                    if tareas
+                        label(for="tareaslibres") Tareas sin Lista
+                        table#tareaslibres.tablaTareas
+                            tr
+                                th Título
+                                th Fecha Límite
+                                th Prioridad
+                                th Estado
+                                th Quitar
+                            each tarea in tareas
+                                - var tareaid= tarea.id
+                                tr
+                                    td 
+                                        a(href="/tareas/"+tarea.id) #{tarea.titulo} 
+                                    td= tarea.fecha_limite
+                                    td= tarea.prioridad
+                                    td= tarea.estado
+                                    td 
+                                        form(action="/listas/agregartarea/"+tareaid+"?_method=PUT", method="post")
+                                            input(type="number" name="id_lista", value=lista.id, hidden)
+                                            input(value="Agregar a Lista",type="submit")
+                    br
+                    if tareasEnLista
+                        label(for="tareas") Tareas en Lista 
+                        table#tablaTareas.tablaTareas
+                            tr
+                                th Título
+                                th Fecha Límite
+                                th Prioridad
+                                th Estado
+                                th Quitar
+                            each tarea in tareasEnLista
+                                tr
+                                    td 
+                                        a(href="/tareas/"+tarea.id) #{tarea.titulo} 
+                                    td= tarea.fecha_limite
+                                    td= tarea.prioridad
+                                    td= tarea.estado
+                                    td 
+                                        form(action="/listas/quitartarea/"+tarea.id+"?_method=PUT", method="post")
+                                            intpu(type="number", value=lista.id, name="id_lista")
+                                            input(value="Quitar de Lista",type="submit")
+            if mensaje 
+                h4 #{mensaje}
+    
+block scripts 
+    script. 
+        function validarForm(){
+            let titulo = document.getElementById('titulo').value.trim();
+            if(titulo.length <=3)
+                return false;
+            return true;
+        }

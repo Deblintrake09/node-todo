@@ -1,0 +1,62 @@
+extends layouts/main-layout
+
+block content 
+    .container 
+        .tareaContainer
+            if modificar
+                h3 Modificar Tarea
+            else 
+                h3 Ingrese una nueva Tarea 
+            - let url = modificar ? tarea.id+"?_method=PUT":"agregar"
+            form(method="post", action="/tareas/"+url)
+                label(for="titulo") Nombre
+                    input#titulo(type='text', name='titulo', value=modificar ? tarea.titulo : "",  required)
+                label(for="descripcion") Descripcion
+                    input#descripcion(type='textfield', name='descripcion', value=modificar ? tarea.descripcion : "")
+                label(for="fecha_limite") Fecha Limite
+                    input#fecha_limite(type='date', name='fecha_limite', value=modificar ? tarea.fecha_limite : null)
+                label(for="prioridad") Prioridad: 
+                    select#prioridad(name='prioridad')
+                        option(value="Baja", selected= modificar &&tarea.prioridad==="Baja"?true:false) Baja 
+                        option(value="Media", selected= modificar &&tarea.prioridad==="Media"?true:false) Media 
+                        option(value="Alta", selected= modificar &&tarea.prioridad==="Alta"?true:false) Alta 
+                label(for="estado") Estado:
+                    select#estado(name='estado')
+                        option(value="Pendiente", selected= modificar &&tarea.estado==="Pendiente"?true:false) Pendiente 
+                        option(value="En Proceso", selected= modificar &&tarea.estado==="En Proceso"?true:false) En Proceso 
+                        option(value="Terminado", selected= modificar &&tarea.estado==="Terminado"?true:false) Terminado 
+                label(for="Lista") Lista: 
+                    select#lista(name='lista')
+                        option(value='') ---------
+                        each lista in listas
+                                option(value=lista.id, selected=modificar && tarea.id_lista==lista.id ? true:false) #{lista.titulo}    
+                if modificar
+                    label(for="fecha_resolucion") Fecha Resolución
+                        input#fecha_resolucion(type='date', name='fecha_resolucion', value=(modificar ? tarea.fecha_resolucion : null))
+                br
+                button(type='submit' onclick="return validarForm()") Enviar
+            if mensaje 
+                h4 #{mensaje}
+    
+block scripts 
+    script. 
+        const prioridad = document.getElementById("prioridad");
+        const estado = document.getElementById("estado");
+        const listas = document.getElementById("lista");
+        const fechaLim = document.getElementById("fecha_limite");
+        function validarForm(){
+            let titulo = document.getElementById('titulo').value.trim();
+            if(titulo.length <=3)
+                return false;
+            return true;
+        }
+
+
+    //let modificarJS = "!{modificar}";
+        let tareaJS = "!{tarea}";
+        if (modificarJS){
+            let fecha = new Date(tarea.fecha_limite.substring);
+            fechaLim.value = fecha;
+            console.log(fecha);
+            console.log("Hola Gil");
+        }

@@ -1,0 +1,13 @@
+extends layouts/main-layout.pug
+
+block content
+    .wrapper
+        .loginContainer 
+            h1 Ingreso al Sistema 
+            form(method="post")
+
+                p.errorMessage #{errorMessage}
+                input#usermame(type="text", name="logUsername", placeholder="Username or  email", value="amicalizzi2005@gmail.com" required="")
+                input#password(type="password", name="logPassword", placeholder="Password", value="1234" required="")
+                input(type="submit", value="Ingresar")
+            a(href="/register") Necesita una Cuenta? Registrese aquí.

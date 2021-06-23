@@ -1,0 +1,49 @@
+extends layouts/main-layout
+
+block content
+       
+    .container
+        .tareasContainer
+            table#tablaListas 
+                tr 
+                    th Título 
+                    th Fecha Creación
+                    th Estado 
+                    th Fecha Finalizada
+                    th Modificar 
+                    th Borrar
+                if listas
+                    each lista in listas
+                        tr 
+                            td
+                                a(href="/listas/ver/"+lista.id)  #{lista.titulo}
+                            td= lista.fecha_creacion
+                            td= lista.estado
+                            td= lista.fecha_resolucion
+                            td
+                                form(action="/listas/"+lista.id, method="get")
+                                    if lista.estado=="Terminado"
+                                        input.disabled(value="Modificar",type="submit" disabled)
+                                    else
+                                        input(value="Modificar",type="submit")
+                            td
+                                form(action="/listas/"+lista.id+"?_method=delete", method="post")
+                                    input(value="Borrar",type="submit")
+                else
+                    tr 
+                        td= mensaje
+
+        
+        .navContainer.mt-5
+            nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
+                ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                    li.nav-item
+                        a.nav-link(href='/listas/agregar') Crear lista
+                    li.nav-item
+                        button.filterBtn(onclick="ordenarCreacion()") Ordenar por Creación
+
+block scripts
+    script.  
+        let tareajs = !{tareas};
+        console.log(tareajs);
+    script(src="./javascripts/tareas.js") 

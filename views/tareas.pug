@@ -1,0 +1,64 @@
+extends layouts/main-layout
+
+block content
+    
+    
+    .container
+        .tareasContainer
+            table#tablaTareas 
+                tr 
+                    th Título 
+                    th Descripcion
+                    th Fecha Creación
+                    th Fecha Límite 
+                    th Prioridad 
+                    th Estado 
+                    th Lista
+                    th Fecha Finalizada 
+                    th Modificar 
+                    th Borrar
+                if tareas
+                    each tarea in tareas 
+                        tr 
+                            td= tarea.dataValues.titulo
+                            td= tarea.descripcion
+                            td= tarea.fecha_creacion
+                            td= tarea.fecha_limite
+                            td= tarea.prioridad
+                            td= tarea.estado
+                            if tarea.Listum
+                                td= tarea.Listum.titulo
+                            else
+                            td= tarea.id_lista
+                            td= tarea.fecha_resolucion
+                            td
+                                form(action="/tareas/"+tarea.id, method="get")
+                                    if tarea.estado =="Terminado"
+                                        input.disabled(value="Modificar",type="submit" disabled)
+                                    else
+                                        input(value="Modificar",type="submit")
+                            td
+                                form(action="/tareas/"+tarea.id+"?_method=delete", method="post")
+                                    input(value="Borrar",type="submit")
+                else
+                    tr 
+                        td= mensaje
+
+        
+        .navContainer.mt-5
+            nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
+                ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                    li.nav-item
+                        a.nav-link(href='/tareas/agregar') Agregar Tarea
+                    li.nav-item
+                        button.filterBtn(onclick="ordenarCreacion()") Ordenar por Creación
+                    li.nav-item
+                        button.filterBtn(onclick="ordenarLimite()") Ordenar Fecha Limite
+                    li.nav-item
+                        button.filterBtn(onclick="ordenarPrioridad()") Ordenar por Prioridad
+
+block scripts
+    script.  
+        let tareajs = !{tareas};
+        console.log(tareajs);
+    script(src="./javascripts/tareas.js") 

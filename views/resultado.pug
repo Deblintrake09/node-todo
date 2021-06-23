@@ -1,0 +1,12 @@
+extends layouts/main-layout
+
+block content 
+    .container
+        if eliminado
+            h2 Se ha Eliminado la #{tipo} con éxito. 
+        if modificado
+            h2 Se ha Modificado la #{tipo} con éxito. 
+        if agregado
+            h2 Se ha creado la #{tipo} siguiente: 
+            h4 Título:  #{agregado.titulo}
+
