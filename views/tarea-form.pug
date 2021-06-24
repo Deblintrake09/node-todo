@@ -10,29 +10,29 @@ block content
             - let url = modificar ? tarea.id+"?_method=PUT":"agregar"
             form(method="post", action="/tareas/"+url)
                 label(for="titulo") Nombre
-                    input#titulo(type='text', name='titulo', value=modificar ? tarea.titulo : "",  required)
+                    input#titulo(type='text', name='titulo', value=modificar ? tarea.titulo : "",  required disabled=(modificar?(tarea.estado==="Terminado"?true:false):false))
                 label(for="descripcion") Descripcion
-                    input#descripcion(type='textfield', name='descripcion', value=modificar ? tarea.descripcion : "")
+                    input#descripcion(type='textfield', name='descripcion', value=modificar ? tarea.descripcion : "" disabled=(modificar?(tarea.estado==="Terminado"?true:false):false))
                 label(for="fecha_limite") Fecha Limite
-                    input#fecha_limite(type='date', name='fecha_limite', value=modificar ? tarea.fecha_limite : null)
+                    input#fecha_limite(type='date', name='fecha_limite', value=modificar ? tarea.fecha_limite : null disabled=(modificar?(tarea.estado==="Terminado"?true:false):false))
                 label(for="prioridad") Prioridad: 
-                    select#prioridad(name='prioridad')
+                    select#prioridad(name='prioridad' disabled=(modificar?(tarea.estado==="Terminado"?true:false):false))
                         option(value="Baja", selected= modificar &&tarea.prioridad==="Baja"?true:false) Baja 
                         option(value="Media", selected= modificar &&tarea.prioridad==="Media"?true:false) Media 
                         option(value="Alta", selected= modificar &&tarea.prioridad==="Alta"?true:false) Alta 
                 label(for="estado") Estado:
-                    select#estado(name='estado')
+                    select#estado(name='estado' disabled=(modificar?(tarea.estado==="Terminado"?true:false):false))
                         option(value="Pendiente", selected= modificar &&tarea.estado==="Pendiente"?true:false) Pendiente 
                         option(value="En Proceso", selected= modificar &&tarea.estado==="En Proceso"?true:false) En Proceso 
                         option(value="Terminado", selected= modificar &&tarea.estado==="Terminado"?true:false) Terminado 
                 label(for="Lista") Lista: 
-                    select#lista(name='lista')
+                    select#lista(name='lista' disabled=(modificar?(tarea.estado==="Terminado"?true:false):false))
                         option(value='') ---------
                         each lista in listas
                                 option(value=lista.id, selected=modificar && tarea.id_lista==lista.id ? true:false) #{lista.titulo}    
                 if modificar
-                    label(for="fecha_resolucion") Fecha Resolución
-                        input#fecha_resolucion(type='date', name='fecha_resolucion', value=(modificar ? tarea.fecha_resolucion : null))
+                    label(for="fecha_resolucion" ) Fecha Resolución
+                        input#fecha_resolucion(type='date', name='fecha_resolucion', value=(modificar ? tarea.fecha_resolucion : null) disabled=(modificar?(tarea.estado==="Terminado"?true:false):false))
                 br
                 button(type='submit' onclick="return validarForm()") Enviar
             if mensaje 

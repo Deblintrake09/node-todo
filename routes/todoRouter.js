@@ -3,7 +3,6 @@ var router = express.Router();
 const {sequelize} = require('../models/index');
 
 router.get('/', async function(req, res, next) {  //listar
-  
   let tareas;
   let error=false;
   tareas = await sequelize.models.Item.findAll({include:[{model:sequelize.models.Lista}]})
@@ -17,7 +16,7 @@ router.get('/', async function(req, res, next) {  //listar
     userLoggedIn: req.session.user,
     userLoggedInJs: JSON.stringify(req.session.user),
   };
-  console.log("--------------------------------------------------------"+JSON.stringify(payload.tareas));
+  
   if(tareas==undefined)
   {
     mensajeValue=error ? "Error - No se pudo recuperar tareas del sistema, intente nuevamente.":"No hay tareas guardadas. Cree una nueva Tarea.";
@@ -59,7 +58,7 @@ router.post('/agregar', function(req, res, next) {  //listar
   }
   sequelize.models.Item.create(tarea)
   .then((result)=>{
-    res.render("resultado", {agregado: result, tipo:"Tarea"})
+    res.render("resultado", {agregado: result, tipo:"Tarea", userLoggedIn: req.session.user, redirect:`/tareas/${result.id}`})
   })
   .catch((err)=>res.render('error',{error:err}))
 });
@@ -67,14 +66,14 @@ router.post('/agregar', function(req, res, next) {  //listar
 router.get('/:id', async function(req, res, next) {  //form ver para editar
 
   let tarea = await sequelize.models.Item.findOne({where:{id:req.params.id}})
-  .catch((err)=>res.status(400).render('error',{error:err}));
+  .catch((err)=>res.status(400).render('error',{error:err, userLoggedIn: req.session.user}));
 
   let listas= await sequelize.models.Lista.findAll()
-  .catch((err)=>res.status(400).render('error',{error:err}));
+  .catch((err)=>res.status(400).render('error',{error:err, userLoggedIn: req.session.user}));
 
   res.status(200).render('tarea-form',{tarea:tarea,
     listas:listas, 
-    modificar:true});
+    modificar:true, userLoggedIn: req.session.user});
 });
 
 router.put('/:id', async function(req, res, next) {  //actualizar
@@ -100,16 +99,16 @@ router.put('/:id', async function(req, res, next) {  //actualizar
     tarea.fecha_resolucion=new Date();
   }
   let resultado = await sequelize.models.Item.update(tarea, {where:{id:req.params.id}})
-  .catch((err)=>res.render('error',{error:err}))
-    res.render("resultado", {modificado: true, tipo:"Tarea"})
+  .catch((err)=>res.render('error',{error:err, userLoggedIn: req.session.user}))
+    res.render("resultado", {modificado: true, tipo:"Tarea", userLoggedIn: req.session.user, redirect:`/tareas/${resultado.id}`})
 });
 
 router.delete('/:id', function(req, res, next) {  //borra
   sequelize.models.Item.destroy({where:{id:req.params.id}})
   .then( result =>{
-    res.render("resultado",{eliminado:true, tipo:"Tarea"});
+    res.render("resultado",{eliminado:true, tipo:"Tarea", userLoggedIn: req.session.user , redirect:`/tareas`});
   })
-  .catch((err)=>res.render('error',{error:err}))
+  .catch((err)=>res.render('error',{error:err, userLoggedIn: req.session.user}))
 });
 
 

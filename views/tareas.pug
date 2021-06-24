@@ -4,61 +4,163 @@ block content
     
     
     .container
-        .tareasContainer
-            table#tablaTareas 
-                tr 
-                    th Título 
-                    th Descripcion
-                    th Fecha Creación
-                    th Fecha Límite 
-                    th Prioridad 
-                    th Estado 
-                    th Lista
-                    th Fecha Finalizada 
-                    th Modificar 
-                    th Borrar
-                if tareas
-                    each tarea in tareas 
-                        tr 
-                            td= tarea.dataValues.titulo
-                            td= tarea.descripcion
-                            td= tarea.fecha_creacion
-                            td= tarea.fecha_limite
-                            td= tarea.prioridad
-                            td= tarea.estado
-                            if tarea.Listum
-                                td= tarea.Listum.titulo
-                            else
-                            td= tarea.id_lista
-                            td= tarea.fecha_resolucion
-                            td
-                                form(action="/tareas/"+tarea.id, method="get")
-                                    if tarea.estado =="Terminado"
-                                        input.disabled(value="Modificar",type="submit" disabled)
-                                    else
-                                        input(value="Modificar",type="submit")
-                            td
-                                form(action="/tareas/"+tarea.id+"?_method=delete", method="post")
-                                    input(value="Borrar",type="submit")
-                else
+        .row
+            .tareasContainer#tareasCont
+                table#tablaTareas 
                     tr 
-                        td= mensaje
+                        th Título 
+                        th Descripcion
+                        th Fecha Creación
+                        th Fecha Límite 
+                        th Prioridad 
+                        th Estado 
+                        th Lista
+                        th Fecha Finalizada 
+                        th Borrar
+                    if tareas
+                        each tarea in tareas 
+                            tr 
+                                td 
+                                    a(href='/tareas/'+tarea.id) #{tarea.dataValues.titulo}
+                                td= tarea.descripcion
+                                td= tarea.fecha_creacion
+                                td= tarea.fecha_limite
+                                td= tarea.prioridad
+                                td= tarea.estado
+                                if tarea.Listum
+                                    td= tarea.Listum.titulo
+                                else
+                                    td
+                                td= tarea.fecha_resolucion
+                                td
+                                    form(action="/tareas/"+tarea.id+"?_method=delete", method="post")
+                                        input(value="Borrar",type="submit")
+                    else
+                        tr 
+                            td= mensaje
 
-        
-        .navContainer.mt-5
-            nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
-                ul.navbar-nav.me-auto.mb-2.mb-lg-0
-                    li.nav-item
-                        a.nav-link(href='/tareas/agregar') Agregar Tarea
-                    li.nav-item
-                        button.filterBtn(onclick="ordenarCreacion()") Ordenar por Creación
-                    li.nav-item
-                        button.filterBtn(onclick="ordenarLimite()") Ordenar Fecha Limite
-                    li.nav-item
-                        button.filterBtn(onclick="ordenarPrioridad()") Ordenar por Prioridad
+            
+            .navContainer.mt-5
+                nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
+                    ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                        li.nav-item.m-
+                            a.nav-link(href='/tareas/agregar') Agregar Tarea
+                        li.nav-item.m-2
+                            button.filterBtn(onclick="ordenarCreacion()") Ordenar por Creación
+                        li.nav-item.m-2
+                            button.filterBtn(onclick="ordenarLimite()") Ordenar Fecha Limite
+                        li.nav-item.m-2
+                            button.filterBtn(onclick="ordenarPrioridad()") Ordenar por Prioridad
+                        li.nav-item.m-2
+                            label(for='filtrar' style='color:white') Filtrar Terminados
+                                input#filtrar( name='filtrar' type='checkbox' onchange='filtrarTerminados()')
+
 
 block scripts
-    script.  
-        let tareajs = !{tareas};
-        console.log(tareajs);
-    script(src="./javascripts/tareas.js") 
+    script.
+        let tareasJs = !{JSON.stringify(tareas)};
+        let container = document.getElementById('tareasCont')
+        let ascendente = false;
+        let ascLim=true;
+        let priorAsc=true;
+        let filtrar=true;
+        
+
+        function filtrarTerminados(){
+            tareasfil= tareasJs.filter(tarea=>tarea.estado!=='Terminado');
+            console.log(tareasfil);
+            if(filtrar){
+                cargarTabla(tareasfil,container);
+            }else{
+                cargarTabla(tareasJs,container);
+            }
+            filtrar=!filtrar;
+        }
+
+        function ordenarCreacion(){
+            if(ascendente)
+            {
+                tareasJs.sort(function(a,b){
+                    return new Date(a.fecha_creacion) - new Date(b.fecha_creacion);
+                });
+                ascendente = false;
+            }else{
+                tareasJs.sort(function(a,b){
+                    return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
+                });
+                ascendente = true;
+            }
+            cargarTabla(tareasJs, container);
+            
+        };
+
+        function ordenarLimite(){
+            if(ascLim)
+            {
+                tareasJs.sort(function(a,b){
+                    return new Date(a.fecha_limite) - new Date(b.fecha_limite);
+                });
+                ascLim = false;
+            }else{
+                tareasJs.sort(function(a,b){
+                    return new Date(b.fecha_limite) - new Date(a.fecha_limite);
+                });
+                ascLim = true;
+            }
+            cargarTabla(tareasJs, container);   
+        };
+
+        
+        function ordenarPrioridad(){
+        
+            if(priorAsc){
+                tareasJs.sort((function(a,b){
+                return b.prioridad.localeCompare(a.prioridad);
+                }));
+                priorAsc=false;
+            } else{
+                tareasJs.sort((function(a,b){
+                return a.prioridad.localeCompare(b.prioridad);
+                }));
+                priorAsc=true;
+            }
+            cargarTabla(tareasJs, container);
+        };
+        
+
+        function cargarTabla(tareas, container){
+            
+            container.innerHTML="";
+            let html=`<table id="listaTareas">
+                        <tr>
+                            <th>Título</th>
+                            <th>Fecha Creación</th>
+                            <th>Fecha Límite</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                            <th>Lista</th>
+                            <th>Fecha Finalizada</th>
+                            <th>Borrar</th>
+                        </tr>`;
+            tareas.forEach(tarea =>{
+                html+=`<tr>
+                            <td>
+                                <a href="/tareas/${tarea.id}")>
+                                ${tarea.titulo}</a>
+                                </td>
+                            <td>${tarea.fecha_creacion}</td>
+                            <td>${tarea.fecha_limite?tarea.fecha_limite:" "}</td>
+                            <td>${tarea.prioridad}</td>
+                            <td>${tarea.estado}</td>
+                            <td>${tarea.Listum? tarea.Listum.titulo:" "}</td>
+                            <td>${tarea.fecha_resolucion?tarea.fecha_resolucion:" "}</td>
+                            <td>
+                                <form action="/tareas/${tarea.id}?_method=delete", method="post">
+                                    <input value="Borrar", type="submit">
+                                </form>
+                            </td>
+                        </tr>`
+            });
+                html+='</table>';
+            container.innerHTML =html;
+        }

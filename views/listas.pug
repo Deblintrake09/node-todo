@@ -3,29 +3,22 @@ extends layouts/main-layout
 block content
        
     .container
-        .tareasContainer
+        .listasContainer#listasContainer
             table#tablaListas 
                 tr 
                     th Título 
                     th Fecha Creación
                     th Estado 
                     th Fecha Finalizada
-                    th Modificar 
                     th Borrar
                 if listas
                     each lista in listas
                         tr 
                             td
-                                a(href="/listas/ver/"+lista.id)  #{lista.titulo}
+                                a(href="/listas/"+lista.id)  #{lista.titulo}
                             td= lista.fecha_creacion
                             td= lista.estado
                             td= lista.fecha_resolucion
-                            td
-                                form(action="/listas/"+lista.id, method="get")
-                                    if lista.estado=="Terminado"
-                                        input.disabled(value="Modificar",type="submit" disabled)
-                                    else
-                                        input(value="Modificar",type="submit")
                             td
                                 form(action="/listas/"+lista.id+"?_method=delete", method="post")
                                     input(value="Borrar",type="submit")
@@ -39,11 +32,66 @@ block content
                 ul.navbar-nav.me-auto.mb-2.mb-lg-0
                     li.nav-item
                         a.nav-link(href='/listas/agregar') Crear lista
-                    li.nav-item
-                        button.filterBtn(onclick="ordenarCreacion()") Ordenar por Creación
+                    if listas
+                        li.nav-item
+                            button.filterBtn(onclick="ordenarCreacion()") Ordenar por Creación
 
 block scripts
-    script.  
-        let tareajs = !{tareas};
-        console.log(tareajs);
+    script.
+        let listasJs = !{JSON.stringify(listas)};
+        let container = document.getElementById('listasContainer')
+        let ascendente = false;
+        ordenarCreacion();
+
+        function ordenarCreacion(){
+            if(ascendente)
+            {
+                listasJs.sort(function(a,b){
+                    return new Date(a.fecha_creacion) - new Date(b.fecha_creacion);
+                });
+                ascendente = false;
+            }else{
+                listasJs.sort(function(a,b){
+                    return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
+                });
+                ascendente = true;
+            }
+            cargarTabla(listasJs, container);
+            
+        };
+
+        function cargarTabla(listas, container){
+            
+            container.innerHTML="";
+            let html=`<table id="tablaListas">
+                        <tr>
+                            <th>Título </th>
+                            <th>Fecha Creación</th>
+                            <th>Estado </th>
+                            <th>Fecha Finalizada</th>
+                            <th>Borrar</th>
+                        </tr>`;
+            listas.forEach(lista =>{
+                html+=`<tr>
+                            <td>
+                                <a href="/listas/${lista.id}")>
+                                ${lista.titulo}</a>
+                                </td>
+                            <td>${lista.fecha_creacion}</td>
+                            <td>${lista.estado}</td>
+                            <td>${lista.fecha_resolucion?lista.fecha_resolucion:""}</td>
+                            <td>
+                                <form action="/listas/"${lista.id}+"?_method=delete", method="post">
+                                    <input value="Borrar", type="submit">
+                                </form>
+                            </td>
+                        </tr>`
+            });
+                html+='</table>';
+            console.log(container);
+            container.innerHTML =html;
+
+        }
+        
+
     script(src="./javascripts/tareas.js") 

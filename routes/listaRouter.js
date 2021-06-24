@@ -24,9 +24,8 @@ router.get('/', async function(req, res, next) {  //listar
   }
   else{
     payload.listas = listas;
+    payload.listasJs= JSON.stringify(listas);
   }
-  console.log(JSON.stringify(payload));
-  
   res.status(200).render('listas', payload);
 });
 
@@ -37,7 +36,7 @@ router.get('/agregar', async function(req, res, next) {  //form
     userLoggedIn: req.session.user,
     userLoggedInJs: JSON.stringify(req.session.user),
   };
-  res.status(200).render('lista-form', payload);
+  res.status(200).render('nueva-lista', payload);
 });
 
 router.post('/agregar', function(req, res, next) {  //guardar
@@ -51,9 +50,9 @@ router.post('/agregar', function(req, res, next) {  //guardar
   }
   sequelize.models.Lista.create(lista)
   .then((result)=>{
-    res.render("resultado", {agregado: result, tipo:"Lista"})
+    res.render("resultado", {tipo:"Lista", userLoggedIn: req.session.user, redirect:`/listas/${result.id}`})
   })
-  .catch((err)=>res.render('error',{error:err}))
+  .catch((err)=>res.render('error',{error:err, userLoggedIn: req.session.user}))
 });
 
 router.get('/:id', async function(req, res, next) {  //form ver para editar
@@ -66,19 +65,20 @@ router.get('/:id', async function(req, res, next) {  //form ver para editar
 
   let tareas= await sequelize.models.Item.findAll({where:{id_lista:null,estado:{[Op.not]: "Terminado"}}})
   .catch((err)=>res.status(400).render('error',{error:err}));
+
   if(tareasEnLista!= null){
     res.status(200).render('lista-form',{lista:lista,
       tareas:tareas,
       tareasEnLista:tareasEnLista, 
-      modificar:true});  
+      modificar:true, userLoggedIn: req.session.user});  
   }else{
     res.status(200).render('lista-form',{lista:lista,
       tareas:tareas, 
-      modificar:true});
+      modificar:true, userLoggedIn: req.session.user});
   }
 });
 
-router.put('/:id', async function(req, res, next) {  //actualizar
+router.put('/modificar', async function(req, res, next) {  //actualizar
   
   let lista = {
     id_usuario: req.session.user.id,
@@ -97,34 +97,33 @@ router.put('/:id', async function(req, res, next) {  //actualizar
   let resultado = await sequelize.models.Lista.update(lista, {where:{id:req.params.id}})
   
   .catch((err)=>res.render('error',{error:err}))
-  res.render("resultado", {modificado: true, tipo:"Lista"})
+  res.render("resultado", {modificado: true, tipo:"Lista", userLoggedIn: req.session.user, redirect:`/listas/${resultado.id}`})
 });
 
 
 router.delete('/:id', function(req, res, next) {  //borra
   sequelize.models.Lista.destroy({where:{id:req.params.id}})
   .then( result =>{
-    res.render("resultado",{eliminado:true, tipo:"Lista"});
+    res.render("resultado",{eliminado:true, tipo:"Lista", userLoggedIn: req.session.user, redirect:`/listas`});
   })
-  .catch((err)=>res.render('error',{error:err}))
+  .catch((err)=>res.render('error',{error:err, userLoggedIn: req.session.user}))
 });
 
 router.put('/agregartarea/:id', function(req, res, next) {  //AGREGA TAREA A LISTA
-  console.log(req.body.id_lista);
   sequelize.models.Item.update({id_lista:req.body.id_lista},{where:{id:req.params.id}})
   .then( result =>{
-    res.redirect(300,`/listas/${req.body.id_lista}`);
+    res.render(`resultado`, { id:req.params.id, modificado:true, mensaje:"Se quitó la Tarea a la Lista", tipo: "Tarea", userLoggedIn: req.session.user, redirect:`/listas/${req.body.id_lista}`});
   })
-  .catch((err)=>res.render('error',{error:err}))
+  .catch((err)=>res.render('error',{error:err, userLoggedIn: req.session.user}))
 });
 
 
-router.put('/quitartarea/:id', function(req, res, next) {  //QUITA TAREA DE LISTA       TODO arreglar redireccion
+router.put('/quitartarea/:id', function(req, res, next) {  //QUITA TAREA DE LISTA
   sequelize.models.Item.update({id_lista:null},{where:{id:req.params.id}})
   .then( result =>{
-    res.redirect(300,`/listas/${req.body.id_lista}`);
+    res.render(`resultado`, { id:req.params.id, modificado:true, mensaje:"Se agregó la Tarea a la Lista", tipo: "Tarea", userLoggedIn: req.session.user, redirect:`/listas/${req.body.id_lista}`});
   })
-  .catch((err)=>res.render('error',{error:err}))
+  .catch((err)=>res.render('error',{error:err, userLoggedIn: req.session.user}))
 });
 
 

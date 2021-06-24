@@ -11,7 +11,6 @@ var methodOverride = require("method-override");
 const indexRouter = require('./routes/indexRouter');
 const loginRouter = require('./routes/loginRouter');
 const registerRouter = require('./routes/registerRouter');
-const usuarioRouter = require('./routes/usuarioRouter');
 const logoutRoute = require('./routes/logoutRouter');
 const todoRouter = require('./routes/todoRouter');
 const listaRouter = require('./routes/listaRouter');
@@ -42,7 +41,6 @@ app.use('/', indexRouter);
 app.use('/login', loginRouter);
 app.use("/logout", logoutRoute);
 app.use('/register', registerRouter);
-app.use('/usuarios', middleware.requireLogin, usuarioRouter);
 app.use('/tareas', middleware.requireLogin, todoRouter);
 app.use('/listas', middleware.requireLogin, listaRouter);
 

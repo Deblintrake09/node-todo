@@ -1,0 +1,33 @@
+extends layouts/main-layout
+
+block content 
+    .container 
+        .tareaContainer
+            h3 Ingrese una nueva Lista 
+            form(method="post", action="/listas/agregar")
+                label(for="titulo") Título
+                    input#titulo(type='text', name='titulo' required)
+                label(for="estado") Estado:
+                    select#estado(name='estado')
+                        option(value="Pendiente") Pendiente 
+                        option(value="En Proceso") En Proceso
+                        if modificar
+                            option(value="Terminado") Terminado
+                if modificar
+                    label(for="fecha_resolucion") Fecha Resolución
+                        input#fecha_resolucion(type='date', name='fecha_resolucion')
+                br
+                button(type='submit' onclick="return validarForm()") Guardar
+                br
+                
+            if mensaje 
+                h4 #{mensaje}
+    
+block scripts 
+    script. 
+        function validarForm(){
+            let titulo = document.getElementById('titulo').value.trim();
+            if(titulo.length <=3)
+                return false;
+            return true;
+        }
