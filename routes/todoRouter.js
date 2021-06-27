@@ -5,7 +5,7 @@ const {sequelize} = require('../models/index');
 router.get('/', async function(req, res, next) {  //listar
   let tareas;
   let error=false;
-  tareas = await sequelize.models.Item.findAll({include:[{model:sequelize.models.Lista}]})
+  tareas = await sequelize.models.Item.findAll({include:[{model:sequelize.models.Lista}], where:{id_usuario:req.session.user.id}})
   .catch(err=>{
     console.log(err);
     error=true;
